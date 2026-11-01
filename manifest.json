@@ -1,0 +1,18 @@
+{
+  "name": "The Ultimate Battleship Strategy Game by Subin Khullar 😎",
+  "short_name": "Battleship OS",
+  "description": "Premium tactical naval warfare strategy game with smart AI, special weapons, and immersive audio.",
+  "start_url": "./index.html",
+  "display": "standalone",
+  "orientation": "landscape-primary",
+  "background_color": "#060b13",
+  "theme_color": "#0ea5e9",
+  "icons": [
+    {
+      "src": "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 512 512'%3E%3Crect width='512' height='512' rx='110' fill='%23060b13'/%3E%3Cpath d='M60 360 L256 120 L452 360 L380 360 L256 210 L132 360 Z' fill='%230ea5e9'/%3E%3Ccircle cx='256' cy='256' r='90' fill='none' stroke='%2338bdf8' stroke-width='16' stroke-dasharray='12 8'/%3E%3Ccircle cx='256' cy='256' r='14' fill='%23ef4444'/%3E%3Cpath d='M256 130 L256 382 M130 256 L382 256' stroke='%2338bdf8' stroke-width='8'/%3E%3C/svg%3E",
+      "sizes": "512x512",
+      "type": "image/svg+xml",
+      "purpose": "any maskable"
+    }
+  ]
+}
