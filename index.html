@@ -1,0 +1,366 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="naval-blue">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <title>The Ultimate Battleship Strategy Game by Subin Khullar 😎</title>
+  
+  <!-- PWA & SEO Meta Tags -->
+  <meta name="theme-color" content="#0ea5e9">
+  <meta name="description" content="Production quality Battleship naval warfare strategy game developed by Subin Khullar.">
+  <link rel="manifest" href="manifest.json">
+  <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 512 512'%3E%3Crect width='512' height='512' rx='110' fill='%23060b13'/%3E%3Cpath d='M60 360 L256 120 L452 360 L380 360 L256 210 L132 360 Z' fill='%230ea5e9'/%3E%3Ccircle cx='256' cy='256' r='90' fill='none' stroke='%2338bdf8' stroke-width='16' stroke-dasharray='12 8'/%3E%3Ccircle cx='256' cy='256' r='14' fill='%23ef4444'/%3E%3Cpath d='M256 130 L256 382 M130 256 L382 256' stroke='%2338bdf8' stroke-width='8'/%3E%3C/svg%3E">
+  
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+
+  <!-- Dynamic FX Canvas Overlay -->
+  <canvas id="fx-canvas"></canvas>
+  <div class="radar-sweep"></div>
+
+  <!-- Header & Tactical HUD -->
+  <header>
+    <div class="brand-wrapper">
+      <span class="brand-icon">⚓</span>
+      <div class="brand-text">
+        <h1>The Ultimate Battleship Strategy Game</h1>
+        <div class="author-tag">Command Edition • By Subin Khullar 😎</div>
+      </div>
+    </div>
+    
+    <div class="header-controls">
+      <button class="btn-icon" id="btn-new-game" title="New Warfare Campaign">⚔️ New Game</button>
+      <button class="btn-icon" id="btn-stats" title="View Career Statistics">📊 Stats</button>
+      <button class="btn-icon" id="btn-achievements" title="Unlockable Medals">🎖️ Medals</button>
+      <button class="btn-icon" id="btn-leaderboard" title="Local High Scores">🏆 Ranks</button>
+      <button class="btn-icon" id="btn-settings" title="Warfare Preferences">⚙️ Settings</button>
+      <button class="btn-icon" id="btn-audio-toggle" title="Toggle Sound">🔊 Audio</button>
+    </div>
+  </header>
+
+  <!-- Main Strategic Warfare Zone -->
+  <main>
+    <!-- Tactical Status Bar -->
+    <section class="tactical-status-bar">
+      <div class="status-module">
+        <span class="status-label">Commander:</span>
+        <span class="status-value" id="hud-commander-name">Cmdr. Subin</span>
+      </div>
+      <div class="status-module">
+        <span class="status-label">Game Mode:</span>
+        <span class="status-value" id="hud-mode">Advanced Warfare</span>
+      </div>
+      <div class="status-module">
+        <span class="status-label">Turn / Threat:</span>
+        <span class="status-value" id="hud-turn-status">Deploy Fleet</span>
+      </div>
+      <div class="status-module" id="timer-module" style="display: none;">
+        <span class="status-label">Turn Clock:</span>
+        <span class="status-value" id="hud-turn-timer">15s</span>
+      </div>
+      <div class="status-module">
+        <span class="status-label">Fleet Score:</span>
+        <span class="status-value" id="hud-score">0</span>
+      </div>
+      <div class="status-module" id="ai-status-module" style="visibility: hidden;">
+        <span class="ai-indicator-pulse"></span>
+        <span class="status-label" style="color: var(--hit-color);">Enemy Calculating Strike...</span>
+      </div>
+    </section>
+
+    <!-- Naval Grid Grids (Dual Theatre) -->
+    <section class="theatre-container">
+      
+      <!-- Player Theatre -->
+      <div class="grid-panel" id="player-grid-panel">
+        <div class="panel-header">
+          <div class="panel-title">
+            <span>🛡️ Allied Waters (Your Fleet)</span>
+          </div>
+          <div class="fleet-health-bar">
+            <div class="fleet-health-fill" id="player-health-fill"></div>
+          </div>
+        </div>
+
+        <div class="grid-outer-wrapper">
+          <div class="grid-col-headers">
+            <div></div><div>A</div><div>B</div><div>C</div><div>D</div><div>E</div><div>F</div><div>G</div><div>H</div><div>I</div><div>J</div>
+          </div>
+          <div class="grid-board-with-rowlabels">
+            <div class="grid-row-headers">
+              <div>1</div><div>2</div><div>3</div><div>4</div><div>5</div><div>6</div><div>7</div><div>8</div><div>9</div><div>10</div>
+            </div>
+            <div class="battleship-grid" id="player-grid"></div>
+          </div>
+        </div>
+
+        <!-- Deployment Dock Panel -->
+        <div class="dock-wrapper" id="dock-panel">
+          <div class="dock-header">
+            <span>VESSEL HARBOR (DEPLOYMENT PHASE)</span>
+            <span id="rotation-status">Axis: HORIZONTAL (Press [R] to Rotate)</span>
+          </div>
+          <div class="ships-tray" id="ships-tray"></div>
+          <div style="display: flex; gap: 8px; margin-top: 10px;">
+            <button class="btn-secondary" id="btn-rotate-ship" style="flex: 1;">🔄 Rotate (R)</button>
+            <button class="btn-secondary" id="btn-auto-deploy" style="flex: 1;">⚡ Auto Deploy</button>
+            <button class="btn-secondary" id="btn-reset-fleet" style="flex: 1;">🗑️ Reset Fleet</button>
+            <button class="btn-primary" id="btn-start-battle" style="flex: 1.5;" disabled>🚀 Engage Battle</button>
+          </div>
+        </div>
+      </div>
+
+      <!-- Enemy Theatre -->
+      <div class="grid-panel" id="enemy-grid-panel">
+        <div class="panel-header">
+          <div class="panel-title">
+            <span id="enemy-panel-title">🎯 Hostile Waters (Target Zone)</span>
+          </div>
+          <div class="fleet-health-bar">
+            <div class="fleet-health-fill" id="enemy-health-fill"></div>
+          </div>
+        </div>
+
+        <div class="grid-outer-wrapper">
+          <div class="grid-col-headers">
+            <div></div><div>A</div><div>B</div><div>C</div><div>D</div><div>E</div><div>F</div><div>G</div><div>H</div><div>I</div><div>J</div>
+          </div>
+          <div class="grid-board-with-rowlabels">
+            <div class="grid-row-headers">
+              <div>1</div><div>2</div><div>3</div><div>4</div><div>5</div><div>6</div><div>7</div><div>8</div><div>9</div><div>10</div>
+            </div>
+            <div class="battleship-grid" id="enemy-grid"></div>
+          </div>
+        </div>
+
+        <!-- Arsenal Weapons Deck -->
+        <div class="arsenal-panel" id="arsenal-panel">
+          <button class="weapon-btn active" data-weapon="cannon">
+            <span style="font-size: 1.2rem;">💥</span>
+            <span class="weapon-name">Standard</span>
+            <span class="weapon-ammo">Ammo: ∞</span>
+          </button>
+          <button class="weapon-btn" data-weapon="torpedo">
+            <span style="font-size: 1.2rem;">🌊</span>
+            <span class="weapon-name">Torpedo Row</span>
+            <span class="weapon-ammo" id="ammo-torpedo">Ammo: 2</span>
+          </button>
+          <button class="weapon-btn" data-weapon="depth-charge">
+            <span style="font-size: 1.2rem;">💣</span>
+            <span class="weapon-name">Depth Charge</span>
+            <span class="weapon-ammo" id="ammo-depth">Ammo: 2</span>
+          </button>
+          <button class="weapon-btn" data-weapon="missile">
+            <span style="font-size: 1.2rem;">🚀</span>
+            <span class="weapon-name">Missile Cross</span>
+            <span class="weapon-ammo" id="ammo-missile">Ammo: 1</span>
+          </button>
+          <button class="weapon-btn" data-weapon="radar">
+            <span style="font-size: 1.2rem;">📡</span>
+            <span class="weapon-name">Radar Scan</span>
+            <span class="weapon-ammo" id="ammo-radar">Ammo: 2</span>
+          </button>
+        </div>
+      </div>
+    </section>
+
+    <!-- Tactical Real-time Battle Log -->
+    <section class="tactical-log-panel" id="tactical-log">
+      <div class="log-entry special">[SYSTEM]: Naval Command Ready. Place your 6 warships on Allied Waters to initiate engagement.</div>
+    </section>
+  </main>
+
+  <!-- Modals -->
+
+  <!-- Settings Modal -->
+  <div class="modal-overlay" id="modal-settings">
+    <div class="tactical-modal">
+      <div class="modal-header">
+        <h2>Command Protocol & Preferences</h2>
+        <button class="btn-icon" data-close-modal>✕</button>
+      </div>
+      <div class="modal-body">
+        <div class="form-group">
+          <label>Commander Identifier</label>
+          <input type="text" id="setting-commander-name" class="tactical-input" maxlength="20" value="Subin Khullar">
+        </div>
+        <div class="form-group">
+          <label>Enemy AI Tactical Identifier</label>
+          <input type="text" id="setting-enemy-name" class="tactical-input" maxlength="20" value="Admiral Megatron">
+        </div>
+        <div class="form-group">
+          <label>Tactical Radar Theme</label>
+          <select id="setting-theme" class="tactical-select">
+            <option value="naval-blue">Naval Blue (Maritime Standard)</option>
+            <option value="dark-command">Dark Command (Night Ops)</option>
+            <option value="steel-fleet">Steel Fleet (Industrial Modern)</option>
+            <option value="neon-warfare">Neon Warfare (Cybernetic Ops)</option>
+            <option value="ocean-storm">Ocean Storm (Abyssal Teal)</option>
+          </select>
+        </div>
+        <div class="form-group">
+          <label>Acoustic Volume</label>
+          <input type="range" id="setting-volume" min="0" max="1" step="0.05" value="0.7">
+        </div>
+        <div style="display: flex; gap: 10px;">
+          <button class="btn-secondary" id="btn-test-sound" style="flex: 1;">🔊 Test Audio Synthesizer</button>
+        </div>
+      </div>
+      <div class="modal-footer">
+        <button class="btn-primary" data-close-modal>Save Protocols</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- New Game / Campaign Configuration Modal -->
+  <div class="modal-overlay" id="modal-new-game">
+    <div class="tactical-modal">
+      <div class="modal-header">
+        <h2>Initiate Naval Conflict</h2>
+        <button class="btn-icon" data-close-modal>✕</button>
+      </div>
+      <div class="modal-body">
+        <div class="form-group">
+          <label>Campaign Warfare Mode</label>
+          <select id="config-game-mode" class="tactical-select">
+            <option value="classic">Classic Naval (Standard Cannon Only)</option>
+            <option value="advanced" selected>Advanced Warfare (Arsenal Superweapons Enabled)</option>
+            <option value="timed">Timed Blitzkrieg (15-Sec Turn Limit)</option>
+            <option value="survival">Survival Fleet (Continuous AI Waves)</option>
+          </select>
+        </div>
+        <div class="form-group">
+          <label>AI Strategic Threat Level</label>
+          <select id="config-difficulty" class="tactical-select">
+            <option value="easy">Cadet (Random Targeting)</option>
+            <option value="medium" selected>Commander (Hunt & Target Trajectory)</option>
+            <option value="hard">Admiral AI (Probability Density Heatmap & Parity Tracking)</option>
+          </select>
+        </div>
+      </div>
+      <div class="modal-footer">
+        <button class="btn-secondary" data-close-modal>Abort</button>
+        <button class="btn-primary" id="btn-confirm-new-game">Commence Deployment</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Statistics Dashboard Modal -->
+  <div class="modal-overlay" id="modal-stats">
+    <div class="tactical-modal" style="max-width: 780px;">
+      <div class="modal-header">
+        <h2>Career Intelligence & Statistics</h2>
+        <button class="btn-icon" data-close-modal>✕</button>
+      </div>
+      <div class="modal-body">
+        <div style="display: grid; grid-template-columns: repeat(4, 1fr); gap: 10px; text-align: center;">
+          <div class="dock-wrapper">
+            <div class="status-label">Sorties</div>
+            <div class="status-value" id="stat-played">0</div>
+          </div>
+          <div class="dock-wrapper">
+            <div class="status-label">Victories</div>
+            <div class="status-value" id="stat-won" style="color: #22c55e;">0</div>
+          </div>
+          <div class="dock-wrapper">
+            <div class="status-label">Win Ratio</div>
+            <div class="status-value" id="stat-win-rate">0%</div>
+          </div>
+          <div class="dock-wrapper">
+            <div class="status-label">Accuracy</div>
+            <div class="status-value" id="stat-accuracy">0%</div>
+          </div>
+        </div>
+
+        <div class="dock-wrapper">
+          <div class="dock-header">TACTICAL PERFORMANCE HISTOGRAM</div>
+          <canvas id="stats-chart" class="chart-container" height="180"></canvas>
+        </div>
+
+        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px;">
+          <div class="dock-wrapper">
+            <div class="dock-header">WEAPON EFFICIENCY</div>
+            <div id="stats-weapon-breakdown" style="font-family: var(--font-mono); font-size: 0.8rem; line-height: 1.8;"></div>
+          </div>
+          <div class="dock-wrapper">
+            <div class="dock-header">THREAT RECORD</div>
+            <div id="stats-ai-breakdown" style="font-family: var(--font-mono); font-size: 0.8rem; line-height: 1.8;"></div>
+          </div>
+        </div>
+      </div>
+      <div class="modal-footer">
+        <button class="btn-secondary" id="btn-reset-stats">Reset Archives</button>
+        <button class="btn-primary" data-close-modal>Dismiss</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Achievements Medal Rack Modal -->
+  <div class="modal-overlay" id="modal-achievements">
+    <div class="tactical-modal">
+      <div class="modal-header">
+        <h2>Hall of Naval Distinctions</h2>
+        <button class="btn-icon" data-close-modal>✕</button>
+      </div>
+      <div class="modal-body" id="achievements-container" style="display: flex; flex-direction: column; gap: 8px;"></div>
+      <div class="modal-footer">
+        <button class="btn-primary" data-close-modal>Acknowledge</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Local Ranks / Leaderboard Modal -->
+  <div class="modal-overlay" id="modal-leaderboard">
+    <div class="tactical-modal">
+      <div class="modal-header">
+        <h2>Admiralty Hall of Fame</h2>
+        <button class="btn-icon" data-close-modal>✕</button>
+      </div>
+      <div class="modal-body">
+        <table style="width: 100%; border-collapse: collapse; font-family: var(--font-mono); font-size: 0.85rem;">
+          <thead>
+            <tr style="border-bottom: 2px solid var(--border-tactical); color: var(--accent-cyan); text-align: left;">
+              <th style="padding: 8px;">Rank</th>
+              <th style="padding: 8px;">Commander</th>
+              <th style="padding: 8px;">Score</th>
+              <th style="padding: 8px;">Accuracy</th>
+              <th style="padding: 8px;">Duration</th>
+            </tr>
+          </thead>
+          <tbody id="leaderboard-body"></tbody>
+        </table>
+      </div>
+      <div class="modal-footer">
+        <button class="btn-primary" data-close-modal>Dismiss</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Battle Debrief Report Modal -->
+  <div class="modal-overlay" id="modal-battle-report">
+    <div class="tactical-modal">
+      <div class="modal-header">
+        <h2 id="report-title">After Action Assessment</h2>
+        <button class="btn-icon" data-close-modal>✕</button>
+      </div>
+      <div class="modal-body" id="report-content" style="font-family: var(--font-mono); line-height: 1.6;"></div>
+      <div class="modal-footer">
+        <button class="btn-secondary" id="btn-export-json">Export JSON</button>
+        <button class="btn-secondary" id="btn-print-report">Print Report</button>
+        <button class="btn-primary" id="btn-report-continue">Deploy Next Sortie</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Toast Notification System -->
+  <div id="toast-container"></div>
+
+  <!-- Footer -->
+  <footer>
+    &copy; 2026 Subin Khullar. All Rights Reserved.
+  </footer>
+
+  <script src="app.js"></script>
+</body>
+</html>
