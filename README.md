@@ -9,14 +9,14 @@ Take command of your fleet, deploy advanced naval weapons, outsmart intelligent 
 ## 🎮 Play the Game
 
 **Live Demo:**  
-[Add Your GitHub Pages URL Here]
+https://subinkhullar.github.io/The-Ultimate-Battleship-Game/
 
 ---
 
 ## 📂 GitHub Repository
 
 **Source Code:**  
-[Add Your GitHub Repository URL Here]
+https://github.com/subinkhullar/The-Ultimate-Battleship-Game/
 
 ---
 
@@ -334,10 +334,6 @@ Planned additions include:
 - Indian Patent Agent
 - Deep-Tech Patent Specialist
 - Author, Creator, and Technology Enthusiast
-
-**GitHub:** [Add GitHub Profile Link]  
-**LinkedIn:** [Add LinkedIn Profile Link]  
-**Website:** [Add Personal Website Link]
 
 ---
 
